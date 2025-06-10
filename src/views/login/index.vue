@@ -1,101 +1,106 @@
 <script setup lang="ts">
-import { ref, reactive, computed } from "vue";
-import { useRouter } from "vue-router";
+import { computed, reactive, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import {
-  NButton, NInput, NSpin, NText, useMessage,
-  NIcon, useThemeVars
-} from "naive-ui";
-import { LoginFrom } from "@/typings/user";
+  NButton, NIcon, NInput, NSpin, NText,
+  useMessage, useThemeVars,
+} from 'naive-ui'
 import {
-  PersonOutline,
   LockClosedOutline,
   LogInOutline,
-} from '@vicons/ionicons5';
+  PersonOutline,
+} from '@vicons/ionicons5'
+import { useI18n } from 'vue-i18n'
+import type { LoginParams } from '@/typings/user'
 
-import { useUserStore } from "@/store/modules/user";
-import { useI18n } from "vue-i18n";
+import { useUserStore } from '@/store/modules/user'
 
-const { t } = useI18n();
-const userStore = useUserStore();
-const router = useRouter();
-const message = useMessage();
-const themeVars = useThemeVars();
+const { t } = useI18n()
+const userStore = useUserStore()
+const router = useRouter()
+const message = useMessage()
+const themeVars = useThemeVars()
 
 // 表单状态管理
-const loginForm = reactive<LoginFrom>({
-  username: '',
-  password: '',
-  type: ''
-});
+const loginForm = reactive<LoginParams>({
+  username: 'admin',
+  password: 'admin123',
+  clientId: import.meta.env.VITE_CHAT_APP_CLIENT_ID,
+  grantType: 'password',
+  tenantId: '000000',
+})
 
 // 加载状态管理
-const loginLoading = ref(false);
-const pageLoading = ref(false);
+const loginLoading = ref(false)
+const pageLoading = ref(false)
 
 // 表单验证
 const formErrors = reactive({
   username: '',
-  password: ''
-});
+  password: '',
+})
 
 // 验证表单
 function validateForm() {
-  let isValid = true;
+  let isValid = true
 
   // 用户名验证
   if (!loginForm.username) {
-    formErrors.username = t('login.usernameRequired');
-    isValid = false;
-  } else {
-    formErrors.username = '';
+    formErrors.username = t('login.usernameRequired')
+    isValid = false
+  }
+  else {
+    formErrors.username = ''
   }
 
   // 密码验证
   if (!loginForm.password) {
-    formErrors.password = t('login.passwordRequired');
-    isValid = false;
-  } else {
-    formErrors.password = '';
+    formErrors.password = t('login.passwordRequired')
+    isValid = false
+  }
+  else {
+    formErrors.password = ''
   }
 
-  return isValid;
+  return isValid
 }
 
 // 账号密码登录
 async function handleLogin(e: MouseEvent) {
-  if (!validateForm()) return;
+  if (!validateForm())
+    return
 
   try {
-    loginLoading.value = true;
-    await userStore.userLogin(loginForm);
-    message.success(t("login.loginSuccess"));
-    router.push("/");
-  } catch (error: any) {
-    message.error(error.message || t("login.loginFailed"));
-  } finally {
-    loginLoading.value = false;
+    loginLoading.value = true
+    await userStore.userLogin(loginForm)
+    message.success(t('login.loginSuccess'))
+    router.push('/')
+  }
+  catch (error: any) {
+    message.error(error.message || t('login.loginFailed'))
+  }
+  finally {
+    loginLoading.value = false
   }
 }
 
 // 跳转到注册页面
 const navigateToRegister = () => {
-  router.push("/regist");
-};
-
+  router.push('/regist')
+}
 
 // 计算背景样式，适配暗黑模式
 const brandSectionStyle = computed(() => {
-  const isDark = themeVars.value.bodyColor.startsWith('#1') ||
-    themeVars.value.bodyColor.startsWith('#2') ||
-    themeVars.value.bodyColor.startsWith('#3');
+  const isDark = themeVars.value.bodyColor.startsWith('#1')
+    || themeVars.value.bodyColor.startsWith('#2')
+    || themeVars.value.bodyColor.startsWith('#3')
 
   return {
     background: isDark
       ? 'linear-gradient(135deg, #003b8e, #0058d9)'
-      : 'linear-gradient(135deg, #1867c0, #5cbbf6)'
-  };
-});
-
+      : 'linear-gradient(135deg, #1867c0, #5cbbf6)',
+  }
+})
 </script>
 
 <template>
@@ -105,7 +110,9 @@ const brandSectionStyle = computed(() => {
         <!-- 左侧品牌区域 -->
         <div class="brand-section" :style="brandSectionStyle">
           <div class="brand-content">
-            <h1 class="brand-title">AI知识库系统</h1>
+            <h1 class="brand-title">
+              AI知识库系统
+            </h1>
             <p class="brand-description">
               企业级智能知识管理平台，助力数字化转型
             </p>
@@ -114,9 +121,10 @@ const brandSectionStyle = computed(() => {
 
         <!-- 右侧登录表单 -->
         <div class="form-wrapper">
-  
           <div class="login-methods">
-            <div class="active-method">账号密码登录</div>
+            <div class="active-method">
+              账号密码登录
+            </div>
           </div>
 
           <div class="form-content">
@@ -126,10 +134,14 @@ const brandSectionStyle = computed(() => {
                 <NText strong class="input-label">
                   {{ $t("login.username") }}
                 </NText>
-                <div v-if="formErrors.username" class="error-message">{{ formErrors.username }}</div>
+                <div v-if="formErrors.username" class="error-message">
+                  {{ formErrors.username }}
+                </div>
               </div>
-              <NInput v-model:value="loginForm.username" :placeholder="$t('login.enterEmailOrPhone')" round clearable
-                class="custom-input" :status="formErrors.username ? 'error' : undefined">
+              <NInput
+                v-model:value="loginForm.username" :placeholder="$t('login.enterEmailOrPhone')" round clearable
+                class="custom-input" :status="formErrors.username ? 'error' : undefined"
+              >
                 <template #prefix>
                   <NIcon :component="PersonOutline" />
                 </template>
@@ -142,10 +154,14 @@ const brandSectionStyle = computed(() => {
                 <NText strong class="input-label">
                   {{ $t("login.password") }}
                 </NText>
-                <div v-if="formErrors.password" class="error-message">{{ formErrors.password }}</div>
+                <div v-if="formErrors.password" class="error-message">
+                  {{ formErrors.password }}
+                </div>
               </div>
-              <NInput v-model:value="loginForm.password" type="password" :placeholder="$t('login.enterPassword')" round
-                show-password-on="click" class="custom-input" :status="formErrors.password ? 'error' : undefined">
+              <NInput
+                v-model:value="loginForm.password" type="password" :placeholder="$t('login.enterPassword')" round
+                show-password-on="click" class="custom-input" :status="formErrors.password ? 'error' : undefined"
+              >
                 <template #prefix>
                   <NIcon :component="LockClosedOutline" />
                 </template>
@@ -161,14 +177,14 @@ const brandSectionStyle = computed(() => {
 
             <!-- 登录按钮 -->
             <div class="action-buttons">
-              <NButton type="primary" block :loading="loginLoading" @click="handleLogin" class="login-button">
+              <NButton type="primary" block :loading="loginLoading" class="login-button" @click="handleLogin">
                 <template #icon>
                   <NIcon :component="LogInOutline" />
                 </template>
                 {{ $t("login.login") }}
               </NButton>
             </div>
-            
+
             <!-- 注册提示 -->
             <div class="register-prompt">
               还没有账号？
@@ -181,8 +197,6 @@ const brandSectionStyle = computed(() => {
         </div>
       </div>
     </NSpin>
-
-
   </div>
 </template>
 

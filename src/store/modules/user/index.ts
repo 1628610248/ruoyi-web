@@ -1,11 +1,11 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
+import { to } from 'await-to-js'
 import type { UserInfo, UserState } from './helper'
 import { defaultSetting, getLocalState, setLocalState } from './helper'
-import {LoginFrom,UserData} from "@/typings/user";
-import { doLogin,loginOut } from '@/api/user'
-import { removeToken,setToken,getToken } from '@/store/modules/auth/helper'
-import { to } from 'await-to-js';
+import type { LoginParams, UserData } from '@/typings/user'
+import { doLogin, loginOut } from '@/api/user'
+import { getToken, removeToken, setToken } from '@/store/modules/auth/helper'
 
 const token = ref(getToken())
 
@@ -16,29 +16,29 @@ export const useUserStore = defineStore('user-store', {
   // 异步|逻辑的地方
   actions: {
     // 用户登录的方法
-    async userLogin(data: LoginFrom){
-      //登录请求
-      const [err, res] = await to(doLogin<UserData>(data));
+    async userLogin(data: LoginParams) {
+      // 登录请求
+      const [err, res] = await to(doLogin<UserData>(data))
       if (res) {
-        const data = res.data;
+        const data = res.data
         // token本地存储
-        setToken(data.token);
-        token.value = data.token;
-        return Promise.resolve();
+        setToken(data.access_token)
+        // token.value = data.access_token
+        return Promise.resolve()
       }
-      return Promise.reject(err);
+      return Promise.reject(err)
     },
     // 二维码登录的方法
-    async userQrLogin(token: string){
-      setToken(token);
+    async userQrLogin(token: string) {
+      setToken(token)
     },
 
     logout: async (): Promise<void> => {
-      await loginOut();
-      token.value = '';
-      removeToken();
+      await loginOut()
+      token.value = ''
+      removeToken()
     },
-   
+
     updateUserInfo(userInfo: Partial<UserInfo>) {
       this.userInfo = { ...this.userInfo, ...userInfo }
       this.recordState()
